@@ -1,0 +1,112 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+
+        var endPointURL = "#to_be_provided#";
+
+        window.onload = function () {
+           
+            var ecommSessionID = window.getParameterByName("ecommSessionID");
+            var sessionVariable = window.getParameterByName("sessionVariable");
+
+            $('#eCommSession').html(ecommSessionID);
+            $('#flashSession').html(sessionVariable);  
+            $('#flashSessionA').html(sessionVariable);                      
+
+            if (sessionVariable != undefined) {
+                CloseSession(sessionVariable);
+            }
+        }
+
+        function getParameterByName(name) {
+            var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
+
+        var Session = function (sessionVariable) {
+            this.sessionVariable = sessionVariable;
+        }
+
+        function CloseSession(sessionVariable) {
+
+            var sessionObj = new Session(sessionVariable);
+
+            CloseSessionAPI(sessionObj);
+        }
+
+        function ReOpenBuilder() {
+            
+            $("#addToCartSection").hide();
+            $("#sessionAlert").show();           
+            $("#iframeDiv").show();           
+
+            var element = document.getElementById("flashIframe");
+            var sessionVariable = window.getParameterByName("sessionVariable");
+
+            element.setAttribute("src", endPointURL + "/Pages/SCGProductPage.aspx?sessionVariable=" + sessionVariable);
+        }
+
+        function CloseSessionAPI(sessionObject) {
+
+            $.ajax({
+                type: "POST",
+                url: endPointURL + "/Services/SCGATGService.asmx/CloseSession",
+                data: JSON.stringify(sessionObject),
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+
+                    var data = JSON.parse(response.hasOwnProperty('d') ? response.d : response);
+
+                    var saveCode = data.SaveCode;
+                    var oldSaveCode = data.oldSaveCode;
+                    var totalQty = data.TotalQty;
+                    var totalAmount = data.TotalAmount;
+
+                    $('#oldSaveCode').html(oldSaveCode);
+                    $('#saveCode').html(saveCode);
+                    $('#totalQty').html(totalQty);
+                    $('#totalAmount').html("$" + totalAmount);
+                },
+                error: function (response, status, error) {
+                    alert("Some error has been encountered while closing flash builder session: " + sessionObject.sessionVariable);
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <div id="addToCartSection" class="jumbotron">
+        <h1 class="display-3">Add To Cart</h1>
+        <p class="lead">Add To Cart redirect sample for e-commerce session <span id="eCommSession" class="badge badge-info"></span> and Flash builder session <span id="flashSession" class="badge badge-primary"></span></p>
+        <hr class="my-2">
+        <p class="lead">Data sent back by Flash builder</p>
+
+        <div class="row">
+                <div class="col">Old Save Code <span id="oldSaveCode" class="badge badge-success"></span></div>
+                <div class="col">New Save Code <span id="saveCode" class="badge badge-success"></span></div>
+                <div class="col">Total Qty <span id="totalQty" class="badge badge-success"></span></div>
+                <div class="col">Total Amount <span id="totalAmount" class="badge badge-success"></span></div>
+        </div>     
+
+        <button type="button" class="btn btn-primary mt-4" id="btnReOpenSession" onclick="ReOpenBuilder()">Re-open Flash builder session</button>
+    </div>
+    <div id="sessionAlert" class="alert alert-success alert-dismissible" style="display: none;">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>        
+            Flash builder session has been re-opened <span id="flashSessionA" class="badge badge-primary"></span>
+        </div>
+    <div id="iframeDiv" style="text-align: center; border: 0px solid #000000; height: 743px; width: 1000px; margin: 0 auto; overflow: hidden; display:none;">
+        <iframe id="flashIframe" height="740" width="1000" frameborder="0" scrolling="no" allowtransparency="true" src_="" />
+    </div>
+</body>
+</html>
+

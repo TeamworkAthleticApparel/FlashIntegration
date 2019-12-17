@@ -1,0 +1,89 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+
+        var endPointURL = "#to_be_provided#";
+
+        var SessionCreate = function () {
+            this.sessionVariable = "";
+            this.redirectURL = "";
+            this.redirectURLCancel = "";
+        }
+
+        function OpenBuilder() {
+
+            $("#commandSec").hide();
+
+            var ecommSessionID = "eComm-" + uuid();
+            var builderSessionID = uuid();
+
+            var sessionObj = new SessionCreate();
+
+            var url = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+
+            sessionObj.sessionVariable = builderSessionID;
+            sessionObj.redirectURL = url + "/addToCart.html?ecommSessionID=" + ecommSessionID + "&";
+            sessionObj.redirectURLCancel = url + "/cancel.html?ecommSessionID=" + ecommSessionID + "&";
+
+            CreateSessionAPI(sessionObj);
+        }
+
+        function CreateSessionAPI(sessionObject) {
+            $("#sessionAlert").show();
+            $("#iframeDiv").show();
+            $.ajax({
+                type: "POST",
+                url: endPointURL + "/Services/SCGATGService.asmx/CreateSession",
+                data: JSON.stringify(sessionObject),
+                cache: false,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+
+                    var element = document.getElementById("flashIframe");
+                    var sessionVariable = sessionObject.sessionVariable;   
+
+                    $('#flashSession').html(sessionVariable);                                     
+                    
+                    element.setAttribute("src", endPointURL + "/Pages/SCGProductPage.aspx?sessionVariable=" + sessionVariable);
+                },
+                error: function (response, status, error) {
+                    alert("Some error has been encountered while creating session for " + sessionObject.sessionVariable);
+                }
+            });
+        }
+
+    function uuid() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }        
+
+    </script>
+</head>
+<body>
+    <div class="jumbotron" id="commandSec">
+        <h1 class="display-3">Flash</h1>
+        <p class="lead">Welcome to Digital Apparel Lab Flash builder integration example</p>
+        <hr class="my-2">
+        <p class="lead">
+            <button type="button" class="btn btn-primary" id="btnCreateSession" onclick="OpenBuilder()">Open Builder</button>
+        </p>
+    </div>
+    <div id="sessionAlert" class="alert alert-success alert-dismissible" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>        
+        Flash builder session has been created <span id="flashSession" class="badge badge-primary"></span>
+    </div>
+    <div id="iframeDiv" style="text-align: center; border: 0px solid #000000; height: 743px; width: 1000px; margin: 0 auto; overflow: hidden; display:none;">
+        <iframe id="flashIframe" height="740" width="1000" frameborder="0" scrolling="no" allowtransparency="true" src_= "" />
+    </div>
+</body>
+</html>
+

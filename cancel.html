@@ -1,0 +1,32 @@
+<html>
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>    
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+
+        window.onload = function () {
+
+            var ecommSessionID = window.getParameterByName("ecommSessionID");
+            $('#eCommSession').html(ecommSessionID);
+        }
+
+        function getParameterByName(name) {
+            var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
+
+    </script>
+</head>
+<body>
+    <div class="jumbotron">
+        <h2>Cancel Flash builder session example</h2>        
+        <p> Flash builder session has been cancelled, e-commerce session <span id="eCommSession" class="badge badge-info"></span></p>
+    </div>
+</body>
+</html>
+
